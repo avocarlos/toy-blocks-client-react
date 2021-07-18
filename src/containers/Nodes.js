@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
@@ -6,44 +6,36 @@ import * as actions from "../actions/nodes";
 import Node from "../components/Node";
 import { Typography, Box } from "@material-ui/core";
 
-export class Nodes extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      expandedNodeURL: null,
-    };
-    this.toggleNodeExpanded = this.toggleNodeExpanded.bind(this);
+export function Nodes({ nodes, actions }) {
+  const [expandedNodeURL, setExpandedNodeURL] = useState(null);
+
+  useEffect(() => {
+    actions.checkNodeStatuses(nodes.list);
+  }, []);
+
+  function toggleNodeExpanded(node) {
+    if (node.url !== expandedNodeURL) {
+      actions.getNodeBlocks(node);
+    }
+
+    setExpandedNodeURL(node.url === expandedNodeURL ? null : node.url);
   }
 
-  componentDidMount() {
-    this.props.actions.checkNodeStatuses(this.props.nodes.list);
-  }
-
-  toggleNodeExpanded(node) {
-    this.setState({
-      expandedNodeURL:
-        node.url === this.state.expandedNodeURL ? null : node.url,
-    });
-  }
-
-  render() {
-    const { nodes } = this.props;
-    return (
-      <Box paddingTop={7}>
-        <Typography variant="h4" component="h1">
-          <strong style={{ color: "#000" }}>Nodes</strong>
-        </Typography>
-        {nodes.list.map((node) => (
-          <Node
-            node={node}
-            key={node.url}
-            expanded={node.url === this.state.expandedNodeURL}
-            toggleNodeExpanded={this.toggleNodeExpanded}
-          />
-        ))}
-      </Box>
-    );
-  }
+  return (
+    <Box paddingTop={7}>
+      <Typography variant="h4" component="h1">
+        <strong style={{ color: "#000" }}>Nodes</strong>
+      </Typography>
+      {nodes.list.map((node) => (
+        <Node
+          node={node}
+          key={node.url}
+          expanded={node.url === expandedNodeURL}
+          toggleNodeExpanded={toggleNodeExpanded}
+        />
+      ))}
+    </Box>
+  );
 }
 
 Nodes.propTypes = {

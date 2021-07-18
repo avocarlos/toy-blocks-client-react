@@ -23,6 +23,48 @@ const checkNodeStatusFailure = (node) => {
   };
 };
 
+const getNodeBlocksLoading = (node) => {
+  return {
+    type: types.GET_NODE_BLOCKS_LOADING,
+    node,
+  };
+};
+
+const getNodeBlocksSuccess = (node, res) => {
+  return {
+    type: types.GET_NODE_BLOCKS_SUCCESS,
+    node,
+    res,
+  };
+};
+
+const getNodeBlocksFailure = (node) => {
+  return {
+    type: types.GET_NODE_BLOCKS_FAILURE,
+    node,
+  };
+};
+
+export function getNodeBlocks(node) {
+  return async (dispatch) => {
+    try {
+      dispatch(getNodeBlocksLoading(node));
+      const res = await fetch(`${node.url}/api/v1/blocks`);
+
+      if (res.status >= 400) {
+        dispatch(getNodeBlocksFailure(node));
+        return;
+      }
+
+      const json = await res.json();
+
+      dispatch(getNodeBlocksSuccess(node, json));
+    } catch (err) {
+      dispatch(getNodeBlocksFailure(node));
+    }
+  };
+}
+
 export function checkNodeStatus(node) {
   return async (dispatch) => {
     try {

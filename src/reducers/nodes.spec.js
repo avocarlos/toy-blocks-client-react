@@ -20,6 +20,18 @@ describe('Reducers::Nodes', () => {
     name: null
   };
 
+  const blocks = [{
+    id: "5",
+    type: "blocks",
+    attributes: {
+      index: 1,
+      timestamp: 1530679678,
+      data: "The Human Torch",
+      "previous-hash": "KsmmdGrKVDr43/OYlM/oFzr7oh6wHG+uM9UpRyIoVe8=",
+      hash: "oHkxOJWOKy02vA9r4iRHVqTgqT+Afc6OYFcNYzyhGEc="
+    }
+  }];
+
   it('should set initial state by default', () => {
     const action = { type: 'unknown' };
     const expected = getInitialState();
@@ -85,6 +97,83 @@ describe('Reducers::Nodes', () => {
           online: false,
           name: 'alpha',
           loading: false
+        },
+        nodeB
+      ]
+    };
+
+    expect(reducer(appState, action)).toEqual(expected);
+  });
+
+  it('should handle GET_NODE_BLOCKS_LOADING', () => {
+    const appState = {
+      list: [nodeA, nodeB]
+    };
+    const action = { type: ActionTypes.GET_NODE_BLOCKS_LOADING, node: nodeA };
+    const expected = {
+      list: [
+        {
+          ...nodeA,
+          blocks: {
+            loading: true
+          }
+        },
+        nodeB
+      ]
+    };
+
+    expect(reducer(appState, action)).toEqual(expected);
+  });
+
+  it('should handle GET_NODE_BLOCKS_SUCCESS', () => {
+    const appState = {
+      list: [nodeA, nodeB]
+    };
+    const action = { 
+      type: ActionTypes.GET_NODE_BLOCKS_SUCCESS, 
+      node: nodeA, 
+      res: {
+        data: blocks
+      }
+    };
+    const expected = {
+      list: [
+        {
+          ...nodeA,
+          blocks: {
+            loading: false,
+            error: false,
+            list: blocks
+          }
+        },
+        nodeB
+      ]
+    };
+
+    expect(reducer(appState, action)).toEqual(expected);
+  });
+
+  it('should handle GET_NODE_BLOCKS_FAILURE', () => {
+    const appState = {
+      list: [
+        {
+          ...nodeA,
+          blocks: {
+            loading: true
+          }
+        },
+        nodeB
+      ]
+    };
+    const action = { type: ActionTypes.GET_NODE_BLOCKS_FAILURE, node: nodeA };
+    const expected = {
+      list: [
+        {
+          ...nodeA,
+          blocks: {
+            loading: false,
+            error: true
+          }
         },
         nodeB
       ]
